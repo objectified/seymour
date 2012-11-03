@@ -13,9 +13,9 @@ Seymour is a library for end user monitoring of web applications by using actual
 ### Quickstart
 I'm assuming you're already somewhat familiar with Python and Nagios/NRPE. If you want to give Seymour a quick spin, you'll obviously need to install it. I prefer to use a virtualenv environment, I'm guessing you do too.
 
+    $ git clone https://github.com/objectified/seymour.git seymour
     $ virtualenv seymour
     $ cd seymour && source bin/activate
-    $ git clone https://github.com/objectified/seymour.git .
     $ python setup.py install 
 
 The next step is to download Selenium Server, and start it. This is as simple as executing the jar file:
