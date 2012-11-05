@@ -5,8 +5,8 @@
 Seymour is a library for end user monitoring of web applications by using actual browsers. It utilizes Selenium (the test automation framework) to create Nagios/NRPE plugins. This means that with Seymour, you can use Selenium based tests as Nagios service checks. Seymour takes in account warning/critical values, timeouts and also returns performance data for relevant steps in your Selenium test. You can handcraft Seymour based scripts using Python, as well as using the Selenium IDE formatter supplied by Seymour. This formatter lets you export Seymour based NRPE plugins directly from your browser.
 
 ### Requirements
-* Python (>=2.7)
-* [Selenium Server](http://seleniumhq.org/download/) (this requires a compatibleJava Runtime Environment to be installed)
+* Python (2.7)
+* [Selenium Server](http://seleniumhq.org/download/) (this requires a compatible Java Runtime Environment to be installed)
 * [Selenium IDE](http://seleniumhq.org/download/) (only needed if you want to export tests to Seymour scripts directly)
 * [Nagios](http://www.nagios.org) (or something that uses Nagios under the hood, like [Opsview](https://www.opsview.com))
 
