@@ -5,7 +5,7 @@
 Seymour is a library for end user monitoring of web applications by using actual browsers. It utilizes Selenium (the test automation framework) to create Nagios/NRPE plugins. This means that with Seymour, you can use Selenium based tests as Nagios service checks. Seymour takes in account warning/critical values, timeouts and also returns performance data for relevant steps in your Selenium test. You can handcraft Seymour based scripts using Python, as well as using the Selenium IDE formatter supplied by Seymour. This formatter lets you export Seymour based NRPE plugins directly from your browser.
 
 ### Requirements
-* Python
+* Python (>=2.7)
 * [Selenium Server](http://seleniumhq.org/download/) (this requires a compatibleJava Runtime Environment to be installed)
 * [Selenium IDE](http://seleniumhq.org/download/) (only needed if you want to export tests to Seymour scripts directly)
 * [Nagios](http://www.nagios.org) (or something that uses Nagios under the hood, like [Opsview](https://www.opsview.com))
@@ -59,11 +59,30 @@ What Seymour does under the hood is proxying method calls to the Python driver f
 * Benchmarkable methods; these are methods that we want to benchmark in order to produce NRPE performance data
 * Test methods; these are method that test for a condition, and should influence the exit code that is returned
 * Step change methods; these methods mark the beginning of a new HTTP request
+
 It is important to know which methods fall in which category, if you want to understand how Seymour results are being returned. Here goes:
 * Benchmarkable methods: 'open', 'open\_window', 'wait\_for\_condition', 'wait\_for\_page\_to\_load', 'wait\_for\_frame\_to\_load', 'wait\_for\_popup', 'go\_back'
 * Test methods: 'is\_alert\_present', 'is\_checked', 'is\_confirmation\_present', 'is\_cookie\_present', 'is\_editable', 'is\_element\_present', 'is\_ordered', 'is\_prompt\_present', 'is\_something\_selected', 'is\_text\_present', 'is\_visible'
 * Step change methods: 'open', 'open\_window', 'click', 'go\_back'
-Seymour intercepts calls to these methods and wraps them with appropriate code for e.g. benchmarking and storing a test result in memory for reporting back all errors. When you run a Seymour based check, you will see labels such as 'step1\_time', 'step2\_time' and so on in the performance data. This means that one of the step change methods has been invoked, so new performance data is recorded for this step.
+Seymour intercepts calls to these methods and wraps them with appropriate code for e.g. benchmarking and storing a test result in memory for reporting back all errors. When you run a Seymour based check, you will see labels such as 'step1\_time', 'step2\_time' and so on in the performance data. This means that one of the step change methods has been invoked, so new performance data is recorded for this step. You can also set your own name when entering a new step so that your performance data makes more sense to a human, by calling set\_step\_name before calling a method that triggers a step change. Here's an example:
+
+    #!/usr/bin/env python
+
+    from seymour.seleniumbaserunner import SeleniumBaseRunner
+
+    class MySeymourCheck(SeleniumBaseRunner):
+        def run(self):
+            sel = self.selenium_proxy
+            sel.set_step_name('homepage')
+            sel.open('/')
+            sel.set_step_name('comments')
+            sel.click('link=comments')
+            sel.wait_for_page_to_load('5000')
+            sel.is_text_present('minutes ago')
+
+    if __name__ == '__main__':
+        check = MySeymourCheck()
+        check.execute()
 
 ### Seymour in production
 As you may have figured out by now, you will need a machine with a browser to run these tests. Your Nagios machine or Opsview masters/slaves probably don't have X installed (which is understandable), so I'd recommend having a few dedicated (virtual) machines that run one or more Selenium Server instances, so that you can point he Seymour based plugins to them through the -H/-p parameters. If you'd like to keep these machines slim, you could choose to use an in memory X server like Xvfb. In such a scenario, the Seymour Python module only needs to be installed on the machines you run your tests from, not on the machine that carries out the actual tests.

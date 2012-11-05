@@ -41,7 +41,7 @@ class SeleniumBaseRunner(object):
 
     def build_nagios_message(self):
         nagios_message = NagiosMessage()
-        for step_key in sorted(self.selenium_proxy.steps.iterkeys()):
+        for step_key in self.selenium_proxy.steps.iterkeys():
             step = self.selenium_proxy.steps[step_key] 
 
             # handle test results

@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from selenium import selenium
 # from selenium.webdriver.emulation.selenium1 import DrivenSelenium
 
@@ -38,12 +39,16 @@ class SeleniumProxy(selenium, object):
             'go_back'
         ]
             
-        self.steps = dict() 
+        self.steps = OrderedDict() 
         self.step_counter = 0
         self.step_prefix = 'step'
         self.active_step_name = None 
+        self.custom_step_name = None
 
         super(SeleniumProxy, self).__init__(host,  port, browserStartCommand, browserURL)
+
+    def set_step_name(self, name):
+        self.custom_step_name = name
 
     def __getattribute__(self, name):
         attr = super(SeleniumProxy, self).__getattribute__(name)
@@ -102,7 +107,12 @@ class SeleniumProxy(selenium, object):
 
     def raise_step(self, step_info):
         self.step_counter += 1        
-        self.active_step_name = self.step_prefix + str(self.step_counter)
+
+        if not self.custom_step_name:
+            self.active_step_name = self.step_prefix + str(self.step_counter)
+        else:
+            self.active_step_name = self.custom_step_name
+            self.custom_step_name = None
 
         step = SeleniumResultStep()
         step.name = self.active_step_name
