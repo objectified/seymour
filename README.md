@@ -23,21 +23,23 @@ The next step is to download Selenium Server, and start it. This is as simple as
     
 By default, Selenium Server listens on port 4444. Now let's create our first Seymour based NRPE plugin.
 
-    #!/usr/bin/env python
+```python
+#!/usr/bin/env python
 
-    from seymour.seleniumbaserunner import SeleniumBaseRunner
+from seymour.seleniumbaserunner import SeleniumBaseRunner
 
-    class MySeymourCheck(SeleniumBaseRunner):
-        def run(self):
-            sel = self.selenium_proxy
-            sel.open('/')
-            sel.click('link=comments')
-            sel.wait_for_page_to_load('5000')
-            sel.is_text_present('minutes ago')
+class MySeymourCheck(SeleniumBaseRunner):
+    def run(self):
+        sel = self.selenium_proxy
+        sel.open('/')
+        sel.click('link=comments')
+        sel.wait_for_page_to_load('5000')
+        sel.is_text_present('minutes ago')
 
-    if __name__ == '__main__':
-        check = MySeymourCheck()
-        check.execute()
+if __name__ == '__main__':
+    check = MySeymourCheck()
+    check.execute()
+```
 
 And that's it. Now to run this script, a number of arguments must be applied. Here's an example:
 
@@ -45,7 +47,7 @@ And that's it. Now to run this script, a number of arguments must be applied. He
 
 If all goes well, you'll see a new browser starting up that opens http://news.ycombinator.com/ (Hacker News), clicks on a link with the name "comments" and validates whether the text "minutes ago" is present. At the end of the test run you should see the test results returned in NRPE format. Also, the exit status of the script execution is in accordance to [how NRPE plugins should behave](http://nagiosplug.sourceforge.net/developer-guidelines.html); it will return 0 on success, 1 if a warning state has been reached, 2 if a critical state has been reached, and 3 if some error occurred which is "unknown". Play around with the script to see how it will behave when you supply values that should fail. You can see a list of the arguments with their meanings by running the following command:
 
-    # python mycheck.py --help
+    $ python mycheck.py --help
 
 Note that the timeout argument is a global timeout which is used for the entire run of the test, whereas the warning and critical thresholds apply to individual steps. 
 As for the syntax in the script, you can simply use the API exposed by the Python bindings for Selenium Remote Control to invoke commands, which is documented over at [Selenium HQ](http://seleniumhq.org), except that you do not explicitly set up a connection to the Selenium Server yourself - this is handled by Seymour using the arguments given upon execution. 
@@ -66,23 +68,25 @@ It is important to know which methods fall in which category, if you want to und
 * Step change methods: 'open', 'open\_window', 'click', 'go\_back'
 Seymour intercepts calls to these methods and wraps them with appropriate code for e.g. benchmarking and storing a test result in memory for reporting back all errors. When you run a Seymour based check, you will see labels such as 'step1\_time', 'step2\_time' and so on in the performance data. This means that one of the step change methods has been invoked, so new performance data is recorded for this step. You can also set your own name when entering a new step so that your performance data makes more sense to a human, by calling set\_step\_name before calling a method that triggers a step change. Here's an example:
 
-    #!/usr/bin/env python
+```python
+#!/usr/bin/env python
 
-    from seymour.seleniumbaserunner import SeleniumBaseRunner
+from seymour.seleniumbaserunner import SeleniumBaseRunner
 
-    class MySeymourCheck(SeleniumBaseRunner):
-        def run(self):
-            sel = self.selenium_proxy
-            sel.set_step_name('homepage')
-            sel.open('/')
-            sel.set_step_name('comments')
-            sel.click('link=comments')
-            sel.wait_for_page_to_load('5000')
-            sel.is_text_present('minutes ago')
+class MySeymourCheck(SeleniumBaseRunner):
+    def run(self):
+        sel = self.selenium_proxy
+        sel.set_step_name('homepage')
+        sel.open('/')
+        sel.set_step_name('comments')
+        sel.click('link=comments')
+        sel.wait_for_page_to_load('5000')
+        sel.is_text_present('minutes ago')
 
-    if __name__ == '__main__':
-        check = MySeymourCheck()
-        check.execute()
+if __name__ == '__main__':
+    check = MySeymourCheck()
+    check.execute()
+```
 
 ### Seymour in production
 As you may have figured out by now, you will need a machine with a browser to run these tests. Your Nagios machine or Opsview masters/slaves probably don't have X installed (which is understandable), so I'd recommend having a few dedicated (virtual) machines that run one or more Selenium Server instances, so that you can point he Seymour based plugins to them through the -H/-p parameters. If you'd like to keep these machines slim, you could choose to use an in memory X server like Xvfb. In such a scenario, the Seymour Python module only needs to be installed on the machines you run your tests from, not on the machine that carries out the actual tests.
